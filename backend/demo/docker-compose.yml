@@ -1,0 +1,56 @@
+services:
+  db:
+    image: mysql:8.0
+    container_name: db_doacoes
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: doacoes
+      MYSQL_USER: pedro
+      MYSQL_PASSWORD: senhalegal
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+    command: --default-authentication-plugin=mysql_native_password
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "pedro", "-psenhalegal"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+    networks:
+      - app-network
+
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: demo_app:latest
+    container_name: demo_app
+    ports:
+      - "8080:8080"
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:mysql://db:3306/doacoes
+      SPRING_DATASOURCE_USERNAME: pedro
+      SPRING_DATASOURCE_PASSWORD: senhalegal
+      DB_HOST: db
+      DB_PORT: 3306
+    depends_on:
+      db:
+        condition: service_healthy
+    networks:
+      - app-network
+    healthcheck:
+      # manter /health privado; usar verificação de porta para healthcheck
+      test: ["CMD", "nc", "-z", "localhost", "8080"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+volumes:
+  mysql_data:
+
+networks:
+  app-network:
+    driver: bridge
