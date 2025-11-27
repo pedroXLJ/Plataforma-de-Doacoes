@@ -1,7 +1,7 @@
 import React from 'react';
 import { X, Heart } from 'lucide-react';
 
-export default function DonationModal({ isOpen, onClose, userProfile, event }) {
+export default function DonationModal({ isOpen, onClose, userProfile, event, onSuccess }) {
   if (!isOpen) return null;
 
   const displayName = userProfile?.nome || 'Usuário';
@@ -71,7 +71,11 @@ export default function DonationModal({ isOpen, onClose, userProfile, event }) {
         <div className="space-y-3">
           <button
             onClick={() => {
-              alert('Obrigado! Sua doação foi registrada. (Simulação)');
+              if (onSuccess) {
+                onSuccess();
+              } else {
+                alert('Obrigado! Sua doação foi registrada. (Simulação)');
+              }
               onClose();
             }}
             className="w-full py-3 bg-rose-600 hover:bg-rose-700 text-white font-bold rounded-lg transition-all transform hover:scale-[1.01] flex items-center justify-center gap-2"

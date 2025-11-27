@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { Link, useParams, useLocation } from 'react-router-dom';
+import { Link, useParams, useLocation, useNavigate } from 'react-router-dom';
 import { ArrowLeft, Calendar, MapPin, Clock, Users, Share2, Heart } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import api from '../services/api';
 import DonationModal from '../components/DonationModal';
+import Toast from '../components/Toast';
 
 // Fallback mock data in case location.state não for fornecido
 const mockEvents = [
@@ -41,9 +42,11 @@ export default function EventDatails() {
   const { user } = useAuth();
   const { id } = useParams();
   const location = useLocation();
+  const navigate = useNavigate();
   const eventFromState = location.state?.event;
   const [showDonationModal, setShowDonationModal] = React.useState(false);
   const [userProfile, setUserProfile] = useState(null);
+  const [toast, setToast] = useState(null);
 
   // Fetch user profile from backend
   useEffect(() => {
@@ -58,7 +61,7 @@ export default function EventDatails() {
           setUserProfile(null);
         });
     } else {
-      setLoading(false);
+      setUserProfile(null);
     }
   }, [user]);
 
@@ -69,10 +72,22 @@ export default function EventDatails() {
   const isVoluntario = tipoStr.includes('volunt') && !tipoStr.includes('entidade');
 
   function handleParticipate() {
-    if (isVoluntario && user) {
-      setShowDonationModal(true);
+    if (!user) {
+      // Usuário não está logado: mostrar toast e redirecionar com next
+      setToast({ type: 'info', title: 'Login necessário', message: 'Faça login ou cadastre-se para fazer uma doação. Redirecionando...' });
+      const next = encodeURIComponent(location.pathname + (location.search || ''));
+      setTimeout(() => navigate(`/login?next=${next}`), 1200);
+      return;
     }
+
+    if (!isVoluntario) {
+      setToast({ type: 'error', title: 'Apenas voluntários', message: 'Apenas voluntários podem fazer doações. Atualize seu perfil para se tornar voluntário.' });
+      return;
+    }
+
+    setShowDonationModal(true);
   }
+
 
   return (
     <>
@@ -159,7 +174,21 @@ export default function EventDatails() {
                 </button>
               </div>
 
-              {isVoluntario ? (
+              {user ? (
+                isVoluntario ? (
+                  <button 
+                    onClick={handleParticipate}
+                    className="w-full py-4 bg-rose-600 hover:bg-rose-700 text-white text-lg font-bold rounded-xl shadow-lg shadow-rose-200 transition-all transform hover:scale-[1.02] flex items-center justify-center gap-2"
+                  >
+                    <Heart className="h-5 w-5 fill-current" />
+                    Quero Doar
+                  </button>
+                ) : (
+                  <div className="w-full py-4 bg-gray-100 text-gray-600 text-lg font-bold rounded-xl text-center">
+                    Apenas voluntários podem fazer doações
+                  </div>
+                )
+              ) : (
                 <button 
                   onClick={handleParticipate}
                   className="w-full py-4 bg-rose-600 hover:bg-rose-700 text-white text-lg font-bold rounded-xl shadow-lg shadow-rose-200 transition-all transform hover:scale-[1.02] flex items-center justify-center gap-2"
@@ -167,10 +196,6 @@ export default function EventDatails() {
                   <Heart className="h-5 w-5 fill-current" />
                   Quero Doar
                 </button>
-              ) : (
-                <div className="w-full py-4 bg-gray-100 text-gray-600 text-lg font-bold rounded-xl text-center">
-                  Apenas voluntários podem fazer doações
-                </div>
               )}
               
               <p className="text-xs text-center text-gray-500 mt-4">
@@ -186,8 +211,10 @@ export default function EventDatails() {
         isOpen={showDonationModal}
         onClose={() => setShowDonationModal(false)}
         userProfile={userProfile}
+        onSuccess={() => setToast({ type: 'success', title: 'Doação registrada', message: 'Obrigado! Sua doação foi registrada. (Simulação)' })}
         event={event}
       />
+      <Toast toast={toast} onClose={() => setToast(null)} />
     </>
   );
 }
