@@ -18,20 +18,15 @@ API REST completa para gerenciar doações, voluntários, entidades e pagamentos
 
 ## 📦 Requisitos
 
-### Opção 1: Com Docker (Recomendado)
+### Com Docker
 - Docker Desktop instalado
 - Docker Compose instalado
-
-### Opção 2: Sem Docker
-- Java 21+
-- Maven 3.9+
-- MySQL 8.0+
 
 ---
 
 ## 🚀 Instalação
 
-### Opção 1: Com Docker Compose (Recomendado)
+### Com Docker Compose (Recomendado)
 
 1. **Clone o repositório**
 ```bash
@@ -50,77 +45,6 @@ docker-compose ps
 ```
 
 Pronto! A API estará disponível em `http://localhost:8080`
-
----
-
-### Opção 2: Sem Docker (Local)
-
-1. **Clone o repositório**
-```bash
-git clone https://github.com/seu-usuario/Plataforma-de-Doacoes.git
-cd Plataforma-de-Doacoes/backend/demo
-```
-
-2. **Instale o MySQL** e crie o banco de dados
-```bash
-mysql -u root -p
-CREATE DATABASE doacoes;
-```
-
-3. **Configure o banco de dados em `application.properties`**
-```properties
-spring.datasource.url=jdbc:mysql://localhost:3306/doacoes
-spring.datasource.username=seu_usuario
-spring.datasource.password=sua_senha
-```
-
-4. **Execute a aplicação**
-```bash
-./mvnw spring-boot:run
-```
-
-ou
-
-```bash
-mvn clean package -DskipTests
-java -jar target/demo-0.0.1-SNAPSHOT.jar
-```
-
----
-
-## ⚙️ Configuração
-
-### Arquivo `application.properties`
-
-Todos os arquivos de configuração estão em `src/main/resources/application.properties`:
-
-```properties
-# Banco de Dados MySQL
-spring.datasource.driver-class-name=com.mysql.cj.jdbc.Driver
-spring.datasource.url=jdbc:mysql://db:3306/doacoes
-spring.datasource.username=pedro
-spring.datasource.password=senhalegal
-
-# JWT Configuration
-app.jwt.secret=mysupersecretsecurekey1234567890abcdefghijklmnopqrstuvwxyz
-app.jwt.expiration-ms=86400000
-
-# CORS - Frontend Origin
-app.frontend.origin=http://localhost:3000
-
-# PagSeguro PIX Integration
-pagseguro.token=Bearer SEU_TOKEN_AQUI
-```
-
-### Variáveis de Ambiente (Docker)
-
-Se usar Docker, as variáveis já estão configuradas em `docker-compose.yml`:
-```yaml
-environment:
-  SPRING_DATASOURCE_URL: jdbc:mysql://db:3306/doacoes
-  SPRING_DATASOURCE_USERNAME: pedro
-  SPRING_DATASOURCE_PASSWORD: senhalegal
-```
 
 ---
 
@@ -160,6 +84,13 @@ Resposta esperada:
   "status": "UP",
   "message": "Application is healthy"
 }
+```
+
+### Front End
+
+**Iniciar:**
+```bash
+npm run dev (local)
 ```
 
 ---
